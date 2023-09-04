@@ -3,7 +3,7 @@ package com.github.aivachkin.socialmedia.service;
 import com.github.aivachkin.socialmedia.domain.JwtAuthentication;
 import com.github.aivachkin.socialmedia.domain.JwtRequest;
 import com.github.aivachkin.socialmedia.domain.JwtResponse;
-import com.github.aivachkin.socialmedia.domain.User;
+import com.github.aivachkin.socialmedia.entity.User;
 import io.jsonwebtoken.Claims;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class AuthService {
         if (user.getPassword().equals(authRequest.getPassword())) {
             final String accessToken = jwtProvider.generateAccessToken(user);
             final String refreshToken = jwtProvider.generateRefreshToken(user);
-            refreshStorage.put(user.getLogin(), refreshToken);
+            refreshStorage.put(user.getUsername(), refreshToken);
             return new JwtResponse(accessToken, refreshToken);
         } else {
             throw new AuthException("Неправильный пароль");
@@ -85,7 +85,7 @@ public class AuthService {
                         .orElseThrow(() -> new AuthException("Пользователь не найден"));
                 final String accessToken = jwtProvider.generateAccessToken(user);
                 final String newRefreshToken = jwtProvider.generateRefreshToken(user);
-                refreshStorage.put(user.getLogin(), newRefreshToken);
+                refreshStorage.put(user.getUsername(), newRefreshToken);
                 return new JwtResponse(accessToken, newRefreshToken);
             }
         }

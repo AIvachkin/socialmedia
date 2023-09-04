@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * Класс - аутентификационные данные пользователя
@@ -31,14 +30,10 @@ public class JwtAuthentication implements Authentication {
      */
     private String firstName;
 
-    /**
-     * Роль пользователя
-     */
-    private Set<Role> roles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+        return null;
     }
 
     @Override

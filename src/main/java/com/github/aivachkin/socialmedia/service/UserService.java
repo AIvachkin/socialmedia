@@ -1,12 +1,10 @@
 package com.github.aivachkin.socialmedia.service;
 
-import com.github.aivachkin.socialmedia.domain.Role;
-import com.github.aivachkin.socialmedia.domain.User;
+import com.github.aivachkin.socialmedia.entity.User;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,14 +19,14 @@ public class UserService {
 
     public UserService() {
         this.users = List.of(
-                new User("anton", "1234", "Антон", "Иванов", Collections.singleton(Role.USER)),
-                new User("ivan", "12345", "Сергей", "Петров", Collections.singleton(Role.ADMIN))
+                new User(1L,"anton", "1234", "Антон", "Иванов"),
+                new User(2L,"ivan", "12345", "Сергей", "Петров")
         );
     }
 
     public Optional<User> getByLogin(@NonNull String login) {
         return users.stream()
-                .filter(user -> login.equals(user.getLogin()))
+                .filter(user -> login.equals(user.getUsername()))
                 .findFirst();
     }
 }

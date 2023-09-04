@@ -1,10 +1,10 @@
-package com.github.aivachkin.socialmedia.domain;
+package com.github.aivachkin.socialmedia.entity;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
- * Класс - роли пользователя
+ * Класс - роли пользователя (пока не используется - для дальнейшего расширения функционала)
  */
 @RequiredArgsConstructor
 public enum Role implements GrantedAuthority {

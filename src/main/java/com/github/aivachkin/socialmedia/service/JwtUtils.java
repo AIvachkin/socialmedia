@@ -1,7 +1,7 @@
 package com.github.aivachkin.socialmedia.service;
 
 import com.github.aivachkin.socialmedia.domain.JwtAuthentication;
-import com.github.aivachkin.socialmedia.domain.Role;
+import com.github.aivachkin.socialmedia.entity.Role;
 import io.jsonwebtoken.Claims;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -24,14 +24,14 @@ public class JwtUtils {
      */
     public static JwtAuthentication generate(Claims claims) {
         final JwtAuthentication jwtInfoToken = new JwtAuthentication();
-        jwtInfoToken.setRoles(getRoles(claims));
+//        jwtInfoToken.setRoles(getRoles(claims));
         jwtInfoToken.setFirstName(claims.get("firstName", String.class));
         jwtInfoToken.setUsername(claims.getSubject());
         return jwtInfoToken;
     }
 
     /**
-     * Метод для получения роли из полезных данных токена
+     * Метод для получения роли из полезных данных токена (пока не используется - для дальнейшего расширения функционала)
      *
      * @param claims полезные данные токена
      * @return роль пользователя
