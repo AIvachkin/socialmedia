@@ -4,10 +4,12 @@ import com.github.aivachkin.socialmedia.domain.JwtAuthentication;
 import com.github.aivachkin.socialmedia.domain.JwtRequest;
 import com.github.aivachkin.socialmedia.domain.JwtResponse;
 import com.github.aivachkin.socialmedia.entity.User;
+import com.github.aivachkin.socialmedia.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.message.AuthException;
@@ -18,11 +20,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserService userService;
+
+    private final UserRepository userRepository;
 
     // Лучше хранить не в мапе, а использовать постоянное хранилище (например, Redis)
     private final Map<String, String> refreshStorage = new HashMap<>();
     private final JwtProvider jwtProvider;
+
+
+    private final PasswordEncoder passwordEncoder;
 
 
     /**
@@ -33,13 +39,18 @@ public class AuthService {
      * @throws AuthException исключение - если пользователь с таким логином/паролем не найден в базе
      */
     public JwtResponse login(@NonNull JwtRequest authRequest) throws AuthException {
-        final User user = userService.getByLogin(authRequest.getLogin())
+
+        final User user = userRepository.findByUsername(authRequest.getUsername())
                 .orElseThrow(() -> new AuthException("Пользователь не найден"));
-        if (user.getPassword().equals(authRequest.getPassword())) {
+
+
+        if (passwordEncoder.matches(authRequest.getPassword(), user.getPassword())) {
+
             final String accessToken = jwtProvider.generateAccessToken(user);
             final String refreshToken = jwtProvider.generateRefreshToken(user);
             refreshStorage.put(user.getUsername(), refreshToken);
             return new JwtResponse(accessToken, refreshToken);
+
         } else {
             throw new AuthException("Неправильный пароль");
         }
@@ -55,10 +66,11 @@ public class AuthService {
     public JwtResponse getAccessToken(@NonNull String refreshToken) throws AuthException {
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
-            final String login = claims.getSubject();
-            final String saveRefreshToken = refreshStorage.get(login);
+            final String username = claims.getSubject();
+            final String saveRefreshToken = refreshStorage.get(username);
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                final User user = userService.getByLogin(login)
+                final User user = userRepository.findByUsername(username)
+//                        userService.getByLogin(login)
                         .orElseThrow(() -> new AuthException("Пользователь не найден"));
                 final String accessToken = jwtProvider.generateAccessToken(user);
                 return new JwtResponse(accessToken, null);
@@ -78,10 +90,11 @@ public class AuthService {
     public JwtResponse refresh(@NonNull String refreshToken) throws AuthException {
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
-            final String login = claims.getSubject();
-            final String saveRefreshToken = refreshStorage.get(login);
+            final String username = claims.getSubject();
+            final String saveRefreshToken = refreshStorage.get(username);
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                final User user = userService.getByLogin(login)
+                final User user = userRepository.findByUsername(username)
+//                        userService.getByLogin(login)
                         .orElseThrow(() -> new AuthException("Пользователь не найден"));
                 final String accessToken = jwtProvider.generateAccessToken(user);
                 final String newRefreshToken = jwtProvider.generateRefreshToken(user);

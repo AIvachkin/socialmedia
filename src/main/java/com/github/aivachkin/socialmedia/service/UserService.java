@@ -1,32 +1,42 @@
 package com.github.aivachkin.socialmedia.service;
 
+import com.github.aivachkin.socialmedia.dto.user.CreateUserRequest;
+import com.github.aivachkin.socialmedia.dto.user.CreateUserResponse;
 import com.github.aivachkin.socialmedia.entity.User;
-import lombok.NonNull;
+import com.github.aivachkin.socialmedia.exception.UserAlreadyExistsException;
+import com.github.aivachkin.socialmedia.mapper.UserMapper;
+import com.github.aivachkin.socialmedia.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
- * Метод возвращает пользователя по логину. Пользователи заранее создаются в конструкторе
+ * Сервис для работы с сущностью User
+ *
  */
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    private final List<User> users;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService() {
-        this.users = List.of(
-                new User(1L,"anton", "1234", "Антон", "Иванов"),
-                new User(2L,"ivan", "12345", "Сергей", "Петров")
-        );
+    private final UserRepository userRepository;
+
+    private final UserMapper userMapper;
+
+
+    public CreateUserResponse createUser(CreateUserRequest createUserRequest) {
+
+        if (userRepository.findByUsername(createUserRequest.getUsername()).isPresent()) {
+            throw new UserAlreadyExistsException("Пользователь с таким логином уже зарегистрирован");
+        }
+
+        User user = userMapper.toUser(createUserRequest);
+        user.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
+
+        userRepository.save(user);
+
+        return userMapper.toCreateUserResponse(user);
     }
 
-    public Optional<User> getByLogin(@NonNull String login) {
-        return users.stream()
-                .filter(user -> login.equals(user.getUsername()))
-                .findFirst();
-    }
 }

@@ -25,6 +25,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+
     /**
      * Контроллер для получения токенов
      *
@@ -40,7 +41,7 @@ public class AuthController {
                             description = "Введены корректные логин и пароль, предоставлены access и refresh токены"
                     )
             }, tags = "Authentication")
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest authRequest) throws AuthException {
         final JwtResponse token = authService.login(authRequest);
         return ResponseEntity.ok(token);
@@ -60,7 +61,7 @@ public class AuthController {
                             description = "Access токен предоставлен"
                     )
             }, tags = "Authentication")
-    @PostMapping("token")
+    @PostMapping("/token")
     public ResponseEntity<JwtResponse> getNewAccessToken(@RequestBody RefreshJwtRequest request) throws AuthException {
         final JwtResponse token = authService.getAccessToken(request.getRefreshToken());
         return ResponseEntity.ok(token);

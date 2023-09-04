@@ -13,7 +13,7 @@ public class JwtRequest {
     /**
      * Логин пользователя
      */
-    private String login;
+    private String username;
 
     /**
      * Пароль пользователя
