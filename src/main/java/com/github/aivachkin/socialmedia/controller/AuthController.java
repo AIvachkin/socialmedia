@@ -27,7 +27,7 @@ public class AuthController {
 
 
     /**
-     * Контроллер для получения токенов
+     * Вход в систему/получение токенов
      *
      * @param authRequest запрос, содержащий логин и пароль пользователя
      * @return ответ, содержащий токены
@@ -35,11 +35,11 @@ public class AuthController {
      */
     @Operation(
             summary = "Аутентификация в системе",
+            description = "Необходимо ввести логин и пароль, указанные при регистрации",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Введены корректные логин и пароль, предоставлены access и refresh токены"
-                    )
+                            description = "Введены корректные логин и пароль, предоставлены access и refresh токены")
             }, tags = "Authentication")
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest authRequest) throws AuthException {
@@ -48,7 +48,7 @@ public class AuthController {
     }
 
     /**
-     * Контроллер для получения access токена
+     * Получение access токена
      *
      * @param request текущий refresh токен пользователя
      * @return access токен
@@ -58,8 +58,7 @@ public class AuthController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Access токен предоставлен"
-                    )
+                            description = "Access токен предоставлен")
             }, tags = "Authentication")
     @PostMapping("/token")
     public ResponseEntity<JwtResponse> getNewAccessToken(@RequestBody RefreshJwtRequest request) throws AuthException {
@@ -68,7 +67,7 @@ public class AuthController {
     }
 
     /**
-     * Контроллер для получения нового набора токенов
+     * Получение нового набора токенов
      *
      * @param request текущий refresh токен пользователя
      * @return набор токенов - access и refresh
@@ -78,8 +77,7 @@ public class AuthController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Access и refresh токены предоставлены"
-                    )
+                            description = "Access и refresh токены предоставлены")
             }, tags = "Authentication")
     @PostMapping("refresh")
     public ResponseEntity<JwtResponse> getNewRefreshToken(@RequestBody RefreshJwtRequest request) throws AuthException {

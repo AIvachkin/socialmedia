@@ -6,8 +6,14 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class CreatePostResponse {
-
+    /**
+     * Заголовок поста
+     */
     private String title;
+
+    /**
+     * Содержание поста
+     */
     private String text;
 
 }
