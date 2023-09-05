@@ -24,7 +24,12 @@ public class UserService {
 
     private final UserMapper userMapper;
 
-
+    /**
+     * Создание пользователя при регистрации
+     *
+     * @param createUserRequest ДТО с входящими данными пользователя
+     * @return ДТО с ответом после создания и сохранения пользователя в БД
+     */
     public CreateUserResponse createUser(CreateUserRequest createUserRequest) {
 
         if (userRepository.findByUsername(createUserRequest.getUsername()).isPresent()) {

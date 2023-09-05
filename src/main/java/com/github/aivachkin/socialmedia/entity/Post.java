@@ -34,9 +34,9 @@ public class Post {
     /**
      * id пользователя
      */
-    @ManyToOne
+//    @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private Long userId;
 
     /**
      * Заголовок поста

@@ -30,6 +30,11 @@ public class JwtAuthentication implements Authentication {
      */
     private String firstName;
 
+    /**
+     * id пользователя
+     */
+    private Long userId;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -48,7 +53,7 @@ public class JwtAuthentication implements Authentication {
 
     @Override
     public Object getPrincipal() {
-        return username;
+        return new JwtUser(userId, username);
     }
 
     @Override

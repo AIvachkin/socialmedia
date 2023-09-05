@@ -1,4 +1,4 @@
-package com.github.aivachkin.socialmedia.service;
+package com.github.aivachkin.socialmedia.utility;
 
 import com.github.aivachkin.socialmedia.domain.JwtAuthentication;
 import com.github.aivachkin.socialmedia.entity.Role;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * Класс - утилита для получения данных из текущего токена пользователя
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class JwtUtils {
+public class JwtUtility {
 
     /**
      * Метод для генерации аутентификационных данных пользователя (информационный токен)
@@ -24,9 +24,10 @@ public class JwtUtils {
      */
     public static JwtAuthentication generate(Claims claims) {
         final JwtAuthentication jwtInfoToken = new JwtAuthentication();
-//        jwtInfoToken.setRoles(getRoles(claims));
+        jwtInfoToken.setUserId(claims.get("userId", Long.class));
         jwtInfoToken.setFirstName(claims.get("firstName", String.class));
         jwtInfoToken.setUsername(claims.getSubject());
+
         return jwtInfoToken;
     }
 

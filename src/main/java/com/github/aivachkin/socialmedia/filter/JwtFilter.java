@@ -2,7 +2,7 @@ package com.github.aivachkin.socialmedia.filter;
 
 import com.github.aivachkin.socialmedia.domain.JwtAuthentication;
 import com.github.aivachkin.socialmedia.service.JwtProvider;
-import com.github.aivachkin.socialmedia.service.JwtUtils;
+import com.github.aivachkin.socialmedia.utility.JwtUtility;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,8 +45,10 @@ public class JwtFilter extends GenericFilterBean {
 
         final String token = getTokenFromRequest((HttpServletRequest) request);
         if (token != null && jwtProvider.validateAccessToken(token)) {
+
             final Claims claims = jwtProvider.getAccessClaims(token);
-            final JwtAuthentication jwtInfoToken = JwtUtils.generate(claims);
+            final JwtAuthentication jwtInfoToken = JwtUtility.generate(claims);
+
             jwtInfoToken.setAuthenticated(true);
             SecurityContextHolder.getContext().setAuthentication(jwtInfoToken);
         }
@@ -59,7 +61,7 @@ public class JwtFilter extends GenericFilterBean {
      * @param request входящий HTTP-запрос
      * @return токен, полученный из входящего запроса
      */
-    private String getTokenFromRequest(HttpServletRequest request) {
+    public String getTokenFromRequest(HttpServletRequest request) {
         final String bearer = request.getHeader(AUTHORIZATION);
         if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
             return bearer.substring(7);
