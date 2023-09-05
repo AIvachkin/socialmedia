@@ -26,18 +26,30 @@ public class PostImage {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="image_id")
     private Long id;
 
     /**
      * Пост, относящийся к изображению
      */
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "post_id")
     private Post post;
 
     /**
-     * Имя файла
+     * Ссылка на файл
      */
-    private String fileName;
+    @Column(name="image_link")
+    private String image;
+
+    /**
+     * Размер изображения
+     */
+    private Long fileSize;
+
+    /**
+     * Тип файла изображения
+     */
+    private String mediaType;
 
 }

@@ -9,8 +9,7 @@ import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
 
 /**
  * Класс - пост пользователя
@@ -56,7 +55,8 @@ public class Post {
     /**
      * Изображения, прикрепленные к посту
      */
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<PostImage> images = new ArrayList<>();
+    @OneToOne
+    @JoinColumn(name = "id")
+    private PostImage image;
 
 }

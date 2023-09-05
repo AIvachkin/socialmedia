@@ -3,7 +3,6 @@ package com.github.aivachkin.socialmedia.dto.post;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 public class PostDTO {
@@ -14,5 +13,4 @@ public class PostDTO {
     private String title;
     private String text;
     private LocalDateTime createdAt;
-    private List<String> imageLinks;
 }

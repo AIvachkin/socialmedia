@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Класс - ответ на запрос пользователя на получение JWT-токена -
+ * Класс - ответ на запрос пользователя на получение JWT-токена
  * access и refresh токены
  */
 @Getter

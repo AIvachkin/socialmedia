@@ -6,17 +6,21 @@ import com.github.aivachkin.socialmedia.dto.post.PostDTO;
 import com.github.aivachkin.socialmedia.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 
 /**
  * Контроллер для работы с постами пользователей
- *
  */
 @RestController
 @RequestMapping("api/posts")
@@ -43,20 +47,44 @@ public class PostController {
                             responseCode = "404",
                             description = "Пользователь не существует")
             }, tags = "Post")
-    @PostMapping(
-//            consumes = "multipart/form-data"
-    )
+    @PostMapping()
     public ResponseEntity<CreatePostResponse> createPost(
-            @Valid
-            @RequestBody CreatePostRequest createPostRequest)
-//
-//            @ModelAttribute("createPostDTO") CreatePostDTO createPostDTO,
-//            @RequestParam(name = "files", required = false) List<MultipartFile> files)
-    {
+            @Valid @RequestBody CreatePostRequest createPostRequest
+//            @ModelAttribute("createPostResponse") CreatePostResponse createPostResponse,
+//            @RequestParam(required = false) MultipartFile image
+    )  {
 
         return ResponseEntity.ok(postService.createPost(createPostRequest));
     }
 
+
+        @Operation(
+            summary = "Установка/обновление картинки поста",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Картинка поста установлена, путь к ней сохранена в БД",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = String.class))
+                    )
+            }, tags = "Post",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = MultipartFile.class))
+            )
+
+    )
+    @PatchMapping(value = "/image/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> updatePostImage(@PathVariable Long postId,
+                                                  @RequestParam MultipartFile image) throws IOException {
+        Boolean updatePostImageDone = postService.updatePostImage(postId, image);
+        if (updatePostImageDone) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(404).build();
+    }
 
 
     /**
@@ -64,7 +92,7 @@ public class PostController {
      *
      * @param userId id пользователя
      * @param offset номер страницы (необязательный параметр)
-     * @param limit количество постов на странице (необязательный параметр)
+     * @param limit  количество постов на странице (необязательный параметр)
      * @return ДТО, содержащий необходимые параметры для отображения
      */
     @Operation(
@@ -86,5 +114,6 @@ public class PostController {
 
         return ResponseEntity.ok(postService.getPostsByUserId(userId, offset, limit));
     }
+
 
 }

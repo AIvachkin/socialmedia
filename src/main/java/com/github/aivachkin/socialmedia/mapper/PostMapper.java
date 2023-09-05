@@ -3,7 +3,6 @@ package com.github.aivachkin.socialmedia.mapper;
 import com.github.aivachkin.socialmedia.dto.post.CreatePostResponse;
 import com.github.aivachkin.socialmedia.dto.post.PostDTO;
 import com.github.aivachkin.socialmedia.entity.Post;
-import com.github.aivachkin.socialmedia.entity.PostImage;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 
@@ -26,11 +25,6 @@ public interface PostMapper {
         postDTO.setCreatedAt(post.getCreatedAt());
         postDTO.setUserId(post.getUserId());
 
-        List<String> imageLinks = post.getImages().stream()
-                .map(PostImage::getFileName)
-                .toList();
-
-        postDTO.setImageLinks(imageLinks);
 
         return postDTO;
     }
