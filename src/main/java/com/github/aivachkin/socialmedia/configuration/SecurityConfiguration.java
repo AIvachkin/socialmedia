@@ -32,6 +32,18 @@ public class SecurityConfiguration {
 
     private final UserRepository userRepository;
 
+    private static final String[] AUTH_WHITELIST = {
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/webjars/**",
+    };
+
+    /**
+     * Бин для получения пользователя из базы для дальнейшего его использования в провайдере
+     *
+     * @return пользователь из базы (или исключение, если не найден)
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> (UserDetails) userRepository.findByUsername(username)
@@ -75,12 +87,24 @@ public class SecurityConfiguration {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests(
-                        authz -> authz
-                                .antMatchers("/api/auth/login", "/api/auth/token", "/api/users/register")
-                                .permitAll()
-                                .anyRequest().authenticated()
-                                .and()
-                                .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class))
+                        authz -> {
+                            try {
+                                authz
+                                        .antMatchers("/api/auth/login", "/api/auth/token", "/api/users/register")
+                                        .permitAll()
+                                        .antMatchers(AUTH_WHITELIST)
+                                        .permitAll()
+                                        .anyRequest().authenticated()
+                                        .and()
+                                        .formLogin()
+                                        .and()
+                                        .logout().logoutSuccessUrl("/api/auth/login")
+                                        .and()
+                                        .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
                 .build();
     }
 }

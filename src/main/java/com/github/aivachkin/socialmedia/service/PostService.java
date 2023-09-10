@@ -4,6 +4,7 @@ import com.github.aivachkin.socialmedia.domain.JwtUser;
 import com.github.aivachkin.socialmedia.dto.post.CreatePostRequest;
 import com.github.aivachkin.socialmedia.dto.post.CreatePostResponse;
 import com.github.aivachkin.socialmedia.dto.post.PostDTO;
+import com.github.aivachkin.socialmedia.dto.post.UpdatePostDto;
 import com.github.aivachkin.socialmedia.entity.Post;
 import com.github.aivachkin.socialmedia.entity.PostImage;
 import com.github.aivachkin.socialmedia.exception.PostNotFoundException;
@@ -44,7 +45,13 @@ public class PostService {
     private String filePath;
 
 
-    public CreatePostResponse createPost(CreatePostRequest createPostRequest)  {
+    /**
+     * Метод для создания поста
+     *
+     * @param createPostRequest ДТО - запрос на создание поста
+     * @return ДТО - ответ после создания поста
+     */
+    public CreatePostResponse createPost(CreatePostRequest createPostRequest) {
 
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -60,6 +67,14 @@ public class PostService {
         return postMapper.toCreatePostResponse(post);
     }
 
+    /**
+     * Метод для получения постов пользователя с постраничным выводом
+     *
+     * @param userId id пользователя
+     * @param offset номер страницы
+     * @param limit  количество постов на странице
+     * @return список ДТО - посты пользователя
+     */
     public Page<PostDTO> getPostsByUserId(Long userId, int offset, int limit) {
 
         Pageable pageable = PageRequest.of(offset, limit, Sort.by("createdAt").descending());
@@ -71,10 +86,17 @@ public class PostService {
 
     }
 
+    /**
+     * Метод для установки или обновления картинки поста
+     *
+     * @param postId id поста
+     * @param image  файл (картинка)
+     * @return ответ об успешности выполнения (true или false)
+     */
     public Boolean updatePostImage(Long postId, MultipartFile image) throws IOException {
 
         Post post = postRepository.findById(postId).orElseThrow(
-                ()->new PostNotFoundException("Пост с id " + postId + " не найден"));
+                () -> new PostNotFoundException("Пост с id " + postId + " не найден"));
 
         Path path = Path.of(filePath, postId + "_image." + getExtensions(image.getOriginalFilename()));
         Files.createDirectories(path.getParent());
@@ -84,12 +106,12 @@ public class PostService {
                 InputStream is = image.getInputStream();
                 OutputStream os = Files.newOutputStream(path, CREATE_NEW);
                 BufferedInputStream bis = new BufferedInputStream(is, 1024);
-                BufferedOutputStream bos = new BufferedOutputStream(os, 1024);
+                BufferedOutputStream bos = new BufferedOutputStream(os, 1024)
         ) {
             bis.transferTo(bos);
         }
         PostImage postImage = post.getImage();
-        if(postImage == null) {
+        if (postImage == null) {
             postImage = new PostImage();
             postImage.setPost(post);
         }
@@ -109,10 +131,53 @@ public class PostService {
 
     /**
      * Метод возвращает расширение файла
-     * @param fileName
-     * @return
+     *
+     * @param fileName имя файла
+     * @return расширение файла
      */
     private String getExtensions(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+
+    /**
+     * Метод для обновления поста
+     *
+     * @param postId        id поста
+     * @param updatePostDTO ДТО - запрос на редактирование поста
+     * @return ДТО - ответ после редактирования поста
+     */
+    public CreatePostResponse updatePost(Long postId, UpdatePostDto updatePostDTO) {
+
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Post post = postRepository.findByUserIdAndId(jwtUser.getUserId(), postId).orElseThrow(
+                () -> new PostNotFoundException("Пост не найден в БД или он принадлежит другому пользователю"));
+
+        if (updatePostDTO.getTitle() != null) {
+            post.setTitle(updatePostDTO.getTitle());
+        }
+        if (updatePostDTO.getText() != null) {
+            post.setText(updatePostDTO.getText());
+        }
+
+        postRepository.save(post);
+
+        return postMapper.toCreatePostResponse(post);
+    }
+
+    /**
+     * Метод для удаления поста пользователя
+     *
+     * @param postId id поста
+     */
+    public void deletePost(Long postId) {
+
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Post post = postRepository.findByUserIdAndId(jwtUser.getUserId(), postId).orElseThrow(
+                () -> new PostNotFoundException("Пост не найден в БД или он принадлежит другому пользователю"));
+
+        postRepository.delete(post);
     }
 }

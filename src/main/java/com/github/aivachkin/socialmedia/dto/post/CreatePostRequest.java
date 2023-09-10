@@ -6,7 +6,10 @@ import lombok.experimental.Accessors;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
-
+/**
+ * ДТО - запрос на создание поста
+ *
+ */
 @Data
 @Accessors(chain = true)
 public class CreatePostRequest {

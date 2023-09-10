@@ -4,12 +4,13 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * ДТО - ответ после создания поста
+ * ДТО - запрос на обновление поста
  *
  */
 @Data
 @Accessors(chain = true)
-public class CreatePostResponse {
+public class UpdatePostDto {
+
     /**
      * Заголовок поста
      */

@@ -3,6 +3,7 @@ package com.github.aivachkin.socialmedia.controller;
 import com.github.aivachkin.socialmedia.dto.post.CreatePostRequest;
 import com.github.aivachkin.socialmedia.dto.post.CreatePostResponse;
 import com.github.aivachkin.socialmedia.dto.post.PostDTO;
+import com.github.aivachkin.socialmedia.dto.post.UpdatePostDto;
 import com.github.aivachkin.socialmedia.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,13 +53,13 @@ public class PostController {
             @Valid @RequestBody CreatePostRequest createPostRequest
 //            @ModelAttribute("createPostResponse") CreatePostResponse createPostResponse,
 //            @RequestParam(required = false) MultipartFile image
-    )  {
+    ) {
 
         return ResponseEntity.ok(postService.createPost(createPostRequest));
     }
 
 
-        @Operation(
+    @Operation(
             summary = "Установка/обновление картинки поста",
             responses = {
                     @ApiResponse(
@@ -113,6 +114,54 @@ public class PostController {
             @Parameter(description = "Размер страницы") @RequestParam(required = false, defaultValue = "10") int limit) {
 
         return ResponseEntity.ok(postService.getPostsByUserId(userId, offset, limit));
+    }
+
+
+    /**
+     * Редактирование ранее размещенного поста
+     *
+     * @param postId        id поста
+     * @param updatePostDTO ДТО - запрос на редактирование поста
+     */
+    @Operation(
+            summary = "Редактирование поста",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Пост успешно обновлён"),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Пользователь/пост не найден в БД")
+            })
+    @PatchMapping("/{postId}")
+    public ResponseEntity<CreatePostResponse> updatePost(
+            @Parameter(description = "ID поста") @PathVariable Long postId,
+            @ModelAttribute UpdatePostDto updatePostDTO) {
+
+        return ResponseEntity.ok(postService.updatePost(postId, updatePostDTO));
+    }
+
+
+    /**
+     * Удаление ранее размещенного поста
+     *
+     * @param postId id поста
+     */
+    @Operation(
+            summary = "Удаление поста",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Пост успешно удалён"),
+                    @ApiResponse(responseCode = "404",
+                            description = "Пользователь/пост не найден в БД")
+
+            })
+    @DeleteMapping("/{postId}")
+    public void deletePost(
+            @Parameter(description = "ID поста") @PathVariable Long postId) {
+
+        postService.deletePost(postId);
     }
 
 
