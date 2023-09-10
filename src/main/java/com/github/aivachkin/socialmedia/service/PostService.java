@@ -1,23 +1,18 @@
 package com.github.aivachkin.socialmedia.service;
 
-import com.github.aivachkin.socialmedia.domain.JwtUser;
-import com.github.aivachkin.socialmedia.dto.post.CreatePostRequest;
-import com.github.aivachkin.socialmedia.dto.post.CreatePostResponse;
-import com.github.aivachkin.socialmedia.dto.post.PostDTO;
-import com.github.aivachkin.socialmedia.dto.post.UpdatePostDto;
-import com.github.aivachkin.socialmedia.entity.Post;
-import com.github.aivachkin.socialmedia.entity.PostImage;
+import com.github.aivachkin.socialmedia.dto.post.*;
+import com.github.aivachkin.socialmedia.entity.*;
 import com.github.aivachkin.socialmedia.exception.PostNotFoundException;
 import com.github.aivachkin.socialmedia.mapper.PostMapper;
 import com.github.aivachkin.socialmedia.repository.PostImageRepository;
 import com.github.aivachkin.socialmedia.repository.PostRepository;
+import com.github.aivachkin.socialmedia.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +20,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
@@ -40,6 +36,9 @@ public class PostService {
     private final PostMapper postMapper;
 
     private final PostImageRepository postImageRepository;
+    private final SubscriptionRepository subscriptionRepository;
+
+    private final UserService userService;
 
     @Value("${path.to.file.folder}")
     private String filePath;
@@ -53,13 +52,10 @@ public class PostService {
      */
     public CreatePostResponse createPost(CreatePostRequest createPostRequest) {
 
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-
         Post post = new Post()
                 .setText(createPostRequest.getText())
                 .setTitle(createPostRequest.getTitle())
-                .setUserId(jwtUser.getUserId())
+                .setUserId(userService.getAuthenticatedUserId())
                 .setCreatedAt(LocalDateTime.now());
 
         postRepository.save(post);
@@ -75,14 +71,12 @@ public class PostService {
      * @param limit  количество постов на странице
      * @return список ДТО - посты пользователя
      */
-    public Page<PostDTO> getPostsByUserId(Long userId, int offset, int limit) {
+    public Page<PostDto> getPostsByUserId(Long userId, int offset, int limit) {
 
         Pageable pageable = PageRequest.of(offset, limit, Sort.by("createdAt").descending());
         Page<Post> postsPage = postRepository.findByUserId(userId, pageable);
 
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        return postsPage.map(post -> postMapper.toPostDto(post, jwtUser.getUsername()));
+        return postsPage.map(post -> postMapper.toPostDto(post, userId));
 
     }
 
@@ -129,16 +123,6 @@ public class PostService {
 
     }
 
-    /**
-     * Метод возвращает расширение файла
-     *
-     * @param fileName имя файла
-     * @return расширение файла
-     */
-    private String getExtensions(String fileName) {
-        return fileName.substring(fileName.lastIndexOf(".") + 1);
-    }
-
 
     /**
      * Метод для обновления поста
@@ -149,9 +133,7 @@ public class PostService {
      */
     public CreatePostResponse updatePost(Long postId, UpdatePostDto updatePostDTO) {
 
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        Post post = postRepository.findByUserIdAndId(jwtUser.getUserId(), postId).orElseThrow(
+        Post post = postRepository.findByUserIdAndId(userService.getAuthenticatedUserId(), postId).orElseThrow(
                 () -> new PostNotFoundException("Пост не найден в БД или он принадлежит другому пользователю"));
 
         if (updatePostDTO.getTitle() != null) {
@@ -173,11 +155,47 @@ public class PostService {
      */
     public void deletePost(Long postId) {
 
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        Post post = postRepository.findByUserIdAndId(jwtUser.getUserId(), postId).orElseThrow(
+        Post post = postRepository.findByUserIdAndId(userService.getAuthenticatedUserId(), postId).orElseThrow(
                 () -> new PostNotFoundException("Пост не найден в БД или он принадлежит другому пользователю"));
 
         postRepository.delete(post);
     }
+
+    /**
+     * Метод для постраничного вывода постов пользователей, на которых подписан текущий пользователь
+     *
+     * @param offset номер страницы
+     * @param limit количество постов на странице
+     * @return список постов
+     */
+    public Page<PostDto> getUserActivityFeed(int offset, int limit) {
+
+        Pageable pageable = PageRequest.of(offset, limit, Sort.by("createdAt").descending());
+
+        List<Subscription> subscriptions =
+                subscriptionRepository.findBySubscriberIdAndSubscriptionStatusIn(userService.getAuthenticatedUserId(),
+                        SubStatus.USER1, SubStatus.BOTH);
+
+        List<Long> targetUserIds = subscriptions.stream()
+                .map(Subscription::getTargetUser)
+                .map(User::getId)
+                .toList();
+
+        Page<Post> activityFeedPosts = postRepository.findByUserIdIn(targetUserIds, pageable);
+
+        return activityFeedPosts.map(postMapper::toPostTargetUserDto);
+    }
+
+    /**
+     * Метод возвращает расширение файла
+     *
+     * @param fileName имя файла
+     * @return расширение файла
+     */
+    private String getExtensions(String fileName) {
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
 }
+
+

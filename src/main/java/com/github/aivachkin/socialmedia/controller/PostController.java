@@ -2,7 +2,7 @@ package com.github.aivachkin.socialmedia.controller;
 
 import com.github.aivachkin.socialmedia.dto.post.CreatePostRequest;
 import com.github.aivachkin.socialmedia.dto.post.CreatePostResponse;
-import com.github.aivachkin.socialmedia.dto.post.PostDTO;
+import com.github.aivachkin.socialmedia.dto.post.PostDto;
 import com.github.aivachkin.socialmedia.dto.post.UpdatePostDto;
 import com.github.aivachkin.socialmedia.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -108,7 +108,7 @@ public class PostController {
                             description = "Пользователь с таким id не существует")
             }, tags = "Post")
     @GetMapping("/{userId}")
-    public ResponseEntity<Page<PostDTO>> getPostByUserId(
+    public ResponseEntity<Page<PostDto>> getPostByUserId(
             @Parameter(description = "ID автора поста") @PathVariable Long userId,
             @Parameter(description = "Номер страницы") @RequestParam(required = false, defaultValue = "0") int offset,
             @Parameter(description = "Размер страницы") @RequestParam(required = false, defaultValue = "10") int limit) {
@@ -132,7 +132,7 @@ public class PostController {
                     @ApiResponse(
                             responseCode = "400",
                             description = "Пользователь/пост не найден в БД")
-            })
+            }, tags = "Post")
     @PatchMapping("/{postId}")
     public ResponseEntity<CreatePostResponse> updatePost(
             @Parameter(description = "ID поста") @PathVariable Long postId,
@@ -156,7 +156,7 @@ public class PostController {
                     @ApiResponse(responseCode = "404",
                             description = "Пользователь/пост не найден в БД")
 
-            })
+            }, tags = "Post")
     @DeleteMapping("/{postId}")
     public void deletePost(
             @Parameter(description = "ID поста") @PathVariable Long postId) {
@@ -164,5 +164,30 @@ public class PostController {
         postService.deletePost(postId);
     }
 
+
+    /**
+     * Получение последних (по времени размещения) постов пользователей, на которых подписан текущий пользователь
+     *
+     * @param offset номер страницы
+     * @param limit  количество постов на странице
+     * @return страница с постами
+     */
+    @Operation(
+            summary = "Лента активности пользователя",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Запрос успешно выполнен"),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Пользователь не найден")
+            }, tags = "User")
+    @GetMapping("/activity-feed")
+    public Page<PostDto> getUserActivityFeed(
+            @RequestParam(required = false, defaultValue = "0") int offset,
+            @RequestParam(required = false, defaultValue = "10") int limit) {
+
+        return postService.getUserActivityFeed(offset, limit);
+    }
 
 }
