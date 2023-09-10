@@ -12,7 +12,6 @@ public interface PostMapper {
 
     CreatePostResponse toCreatePostResponse(Post post);
 
-    //    @Mapping(source = "images", target = "imageLinks")
     default PostDto toPostDto(Post post, Long userId) {
 
         PostDto postDTO = new PostDto();

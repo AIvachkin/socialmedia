@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
 
-    Optional<Subscription> findBySubscriberAndTargetUserAndFriendStatus(
+    Optional<Subscription> findBySubscriber_IdAndTargetUser_IdAndFriendStatus(
             Long subscriberId, Long targetUserId, FriendStatus friendStatus);
 
 
@@ -32,5 +32,19 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     List<Subscription> findBySubscriberIdAndSubscriptionStatusIn(@Param("subscriberId") Long subscriberId,
                                                                  @Param("status1") SubStatus status1,
                                                                  @Param("status2") SubStatus status2);
+
+    /**
+     * Запрос на проверку статуса двух пользователей
+     *
+     * @param subscriberId id подписчика, отправляющего сообщение
+     * @param targetUserId id подписчика, получающего сообщение
+     * @param status статус, в котором находятся пользователи
+     * @return выборка из базы по полученным параметрам
+     */
+    @Query("SELECT s FROM Subscription s " +
+            "WHERE (s.subscriber.id = :subscriberId AND s.targetUser.id = :targetUserId AND s.subStatus = :status)")
+    Subscription findSubscriptionsWithSubStatus(@Param("subscriberId") Long subscriberId,
+                                                @Param("targetUserId") Long targetUserId,
+                                                @Param("status") SubStatus status);
 
 }

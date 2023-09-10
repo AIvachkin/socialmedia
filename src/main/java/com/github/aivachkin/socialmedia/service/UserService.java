@@ -10,7 +10,6 @@ import com.github.aivachkin.socialmedia.exception.UserAlreadyExistsException;
 import com.github.aivachkin.socialmedia.exception.UserCanNotSubscribeException;
 import com.github.aivachkin.socialmedia.exception.UserNotFoundException;
 import com.github.aivachkin.socialmedia.mapper.UserMapper;
-import com.github.aivachkin.socialmedia.repository.PostRepository;
 import com.github.aivachkin.socialmedia.repository.SubscriptionRepository;
 import com.github.aivachkin.socialmedia.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    private final PostRepository postRepository;
 
     private final SubscriptionRepository subscriptionRepository;
 
@@ -86,13 +84,13 @@ public class UserService {
     /**
      * Метод для подтверждения взаимной подписки (переход в статус "дружба")
      *
-     * @param friendshipDto ДТО, содержащий id адресата
+     * @param friendshipDto ДТО, содержащий id отправителя запроса на дружбу
      */
     public void acceptFriendshipRequest(FriendshipDto friendshipDto) {
 
 
-        Subscription subscription = subscriptionRepository.findBySubscriberAndTargetUserAndFriendStatus(
-                getAuthenticatedUserId(), friendshipDto.getTargetUserId(), FriendStatus.UNACCEPTED).orElseThrow(
+        Subscription subscription = subscriptionRepository.findBySubscriber_IdAndTargetUser_IdAndFriendStatus(
+                friendshipDto.getTargetUserId(), getAuthenticatedUserId(),  FriendStatus.UNACCEPTED).orElseThrow(
                 () -> new SubscriptionDoesNotExistException("Подписка невозможна")
         );
 
@@ -110,7 +108,7 @@ public class UserService {
      */
     public void declineFriendshipRequest(FriendshipDto friendshipDto) {
 
-        Subscription subscription = subscriptionRepository.findBySubscriberAndTargetUserAndFriendStatus(
+        Subscription subscription = subscriptionRepository.findBySubscriber_IdAndTargetUser_IdAndFriendStatus(
                 getAuthenticatedUserId(), friendshipDto.getTargetUserId(), FriendStatus.UNACCEPTED).orElseThrow(
                 () -> new SubscriptionDoesNotExistException("Подписка невозможна")
         );
@@ -127,7 +125,7 @@ public class UserService {
      */
     public void removeFriend(FriendshipDto friendshipDto) {
 
-        Subscription subscription = subscriptionRepository.findBySubscriberAndTargetUserAndFriendStatus(
+        Subscription subscription = subscriptionRepository.findBySubscriber_IdAndTargetUser_IdAndFriendStatus(
                 getAuthenticatedUserId(), friendshipDto.getTargetUserId(), FriendStatus.ACCEPTED).orElseThrow(
                 () -> new SubscriptionDoesNotExistException("Ошибочный запрос. Отписаться невозможно"));
 

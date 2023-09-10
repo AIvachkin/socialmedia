@@ -38,8 +38,6 @@ public class PostController {
      */
     @Operation(
             summary = "Создание поста",
-            description = "Необходимо ввести заголовок, текст (содержание) и прикрепить изображения. " +
-                    "Изображения прикреплять необязательно",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -49,16 +47,19 @@ public class PostController {
                             description = "Пользователь не существует")
             }, tags = "Post")
     @PostMapping()
-    public ResponseEntity<CreatePostResponse> createPost(
-            @Valid @RequestBody CreatePostRequest createPostRequest
-//            @ModelAttribute("createPostResponse") CreatePostResponse createPostResponse,
-//            @RequestParam(required = false) MultipartFile image
-    ) {
+    public ResponseEntity<CreatePostResponse> createPost(@Valid @RequestBody CreatePostRequest createPostRequest) {
 
         return ResponseEntity.ok(postService.createPost(createPostRequest));
     }
 
 
+    /**
+     * Метод для установки/обновления картинки поста
+     *
+     * @param postId id поста
+     * @param image  картинка (файл)
+     * @return статус выполнения
+     */
     @Operation(
             summary = "Установка/обновление картинки поста",
             responses = {
@@ -98,7 +99,6 @@ public class PostController {
      */
     @Operation(
             summary = "Получение всех постов пользователя",
-            description = "Постраничный вывод постов пользователя",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -181,7 +181,7 @@ public class PostController {
                     @ApiResponse(
                             responseCode = "404",
                             description = "Пользователь не найден")
-            }, tags = "User")
+            }, tags = "Post")
     @GetMapping("/activity-feed")
     public Page<PostDto> getUserActivityFeed(
             @RequestParam(required = false, defaultValue = "0") int offset,
