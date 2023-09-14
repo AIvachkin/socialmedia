@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
 
 /**
  * ДТО - запрос на создание поста
@@ -26,9 +25,5 @@ public class CreatePostRequest {
     @NotEmpty(message = "Текст обязателен для ввода")
     private String text;
 
-    /**
-     * Ссылки на изображения к посту
-     */
-    private List<String> imageLink;
 
 }

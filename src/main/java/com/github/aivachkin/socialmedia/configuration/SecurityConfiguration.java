@@ -90,15 +90,15 @@ public class SecurityConfiguration {
                         authz -> {
                             try {
                                 authz
-                                        .antMatchers("/api/auth/login", "/api/auth/token", "/api/users/register")
+                                        .antMatchers("/api/auth/login", "/api/users/register")
                                         .permitAll()
                                         .antMatchers(AUTH_WHITELIST)
                                         .permitAll()
                                         .anyRequest().authenticated()
                                         .and()
                                         .formLogin()
-                                        .and()
-                                        .logout().logoutSuccessUrl("/api/auth/login")
+//                                        .and()
+//                                        .logout().logoutSuccessUrl("/api/auth/login")
                                         .and()
                                         .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);
                             } catch (Exception e) {
