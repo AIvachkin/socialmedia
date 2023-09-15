@@ -4,8 +4,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 
-// Возможно не понадобится
-// Класс для получения ключей
+// Класс для получения ключей с выводом результата в консоль
 public class GenerateKeys {
 
     public static void main(String[] args) {
