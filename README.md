@@ -54,4 +54,4 @@ git clone https://github.com/AIvachkin/socialmedia.git
 
 ### В разработке проекта принимал участие
 
-- Андрей Ивачкин (@Avi_83)
+- Андрей Ивачкин (https://t.me/AIvachkin)
