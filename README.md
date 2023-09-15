@@ -42,7 +42,7 @@ git clone https://github.com/AIvachkin/socialmedia.git
 ```
 
 - Подключите базу данных: в файле настроек
-  приложения **[application.properties](src/main/resources/application.properties)** укажите название базы данных, имя
+  приложения [application.properties](src/main/resources/application.properties) укажите название базы данных, имя
   пользователя и пароль
 
 - Запустите приложение в
