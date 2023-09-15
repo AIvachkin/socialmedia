@@ -38,7 +38,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
      *
      * @param subscriberId id подписчика, отправляющего сообщение
      * @param targetUserId id подписчика, получающего сообщение
-     * @param status статус, в котором находятся пользователи
+     * @param status       статус, в котором находятся пользователи
      * @return выборка из базы по полученным параметрам
      */
     @Query("SELECT s FROM Subscription s " +
@@ -46,5 +46,13 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     Subscription findSubscriptionsWithSubStatus(@Param("subscriberId") Long subscriberId,
                                                 @Param("targetUserId") Long targetUserId,
                                                 @Param("status") SubStatus status);
+
+    @Query("SELECT s FROM Subscription s " +
+            "WHERE s.subscriber.id = :subscriberId AND s.targetUser.id = :targetUserId " +
+            "AND s.friendStatus = :friendStatus AND s.subStatus = :subStatus")
+    Optional<Subscription> findByParam(@Param("subscriberId") Long subscriberId,
+                                       @Param("targetUserId") Long targetUserId,
+                                       @Param("friendStatus") FriendStatus friendStatus,
+                                       @Param("subStatus") SubStatus subStatus);
 
 }
