@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.aivachkin.socialmedia.domain.JwtRequest;
 import com.github.aivachkin.socialmedia.domain.JwtResponse;
 import com.github.aivachkin.socialmedia.dto.post.CreatePostRequest;
+import com.github.aivachkin.socialmedia.dto.post.UpdatePostDto;
 import com.github.aivachkin.socialmedia.entity.Post;
 import com.github.aivachkin.socialmedia.repository.PostRepository;
 import com.github.aivachkin.socialmedia.repository.SubscriptionRepository;
@@ -23,8 +24,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -56,7 +57,7 @@ class PostControllerTest {
     @DisplayName("Тест для метода создания поста")
     @Test
     @SneakyThrows
-    void createPost() {
+    void createPostTest() {
 
         CreatePostRequest createPostRequest = new CreatePostRequest()
                 .setTitle("Title")
@@ -70,35 +71,84 @@ class PostControllerTest {
                         .content(jsonPost))
                 .andExpect(status().isOk());
 
-        Optional<Post> savedPost1 = postRepository.findById(1L);
-        Optional<Post> savedPost2 = postRepository.findById(2L);
-        assertTrue(savedPost1.isPresent());
-        assertTrue(savedPost2.isPresent());
-        assertEquals("Title", savedPost1.get().getTitle());
-        assertEquals("Title", savedPost2.get().getTitle());
-        assertEquals("Text", savedPost1.get().getText());
-        assertEquals("Text", savedPost2.get().getText());
+        Optional<Post> savedPost = postRepository.findById(2L);
+        assertTrue(savedPost.isPresent());
+        assertEquals("Title", savedPost.get().getTitle());
+        assertEquals("Text", savedPost.get().getText());
 
     }
 
+    @DisplayName("Тест для метода редактирования поста")
     @Test
-    void updatePostImage() {
+    @SneakyThrows
+    void updatePostTest() {
+
+        long postId = 1L;
+
+        UpdatePostDto updatePostDto = new UpdatePostDto()
+                .setTitle("New Title")
+                .setText("New Text");
+
+        String jsonPostUpd = new ObjectMapper().writeValueAsString(updatePostDto);
+
+        mockMvc.perform(patch("/api/posts/" + postId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonPostUpd)
+                        .flashAttr("updatePostDto", updatePostDto))
+                .andExpect(status().isOk());
+
+        Optional<Post> savedPost = postRepository.findById(postId);
+        assertTrue(savedPost.isPresent());
+        assertEquals("New Title", savedPost.get().getTitle());
+        assertEquals("New Text", savedPost.get().getText());
     }
 
+    @DisplayName("Тест для метода удаления поста пользователя")
     @Test
-    void getPostByUserId() {
+    @SneakyThrows
+    void deletePostTest() {
+
+        long postId = 1L;
+
+        mockMvc.perform(delete("/api/posts/" + postId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
     }
 
+    @DisplayName("Тест для метода постраничного вывода постов пользователя")
     @Test
-    void updatePost() {
+    @SneakyThrows
+    void getPostByUserIdTest() {
+
+        long userId = 1L;
+        int offset = 0;
+        int limit = 10;
+
+        mockMvc.perform(get("/api/posts/" + userId + "?offset=" + offset + "&limit=" + limit)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isNotEmpty());
+
     }
 
+    @DisplayName("Тест для метода просмотра ленты активности")
     @Test
-    void deletePost() {
-    }
-
-    @Test
+    @SneakyThrows
     void getUserActivityFeed() {
+
+        int offset = 0;
+        int limit = 10;
+
+        mockMvc.perform(get("/api/posts/activity-feed" + "?offset=" + offset + "&limit=" + limit)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isNotEmpty());
+
     }
 
     @SneakyThrows
