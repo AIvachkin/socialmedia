@@ -109,7 +109,7 @@ public class UserService {
     public void declineFriendshipRequest(FriendshipDto friendshipDto) {
 
         Subscription subscription = subscriptionRepository.findBySubscriber_IdAndTargetUser_IdAndFriendStatus(
-                getAuthenticatedUserId(), friendshipDto.getTargetUserId(), FriendStatus.UNACCEPTED).orElseThrow(
+                friendshipDto.getTargetUserId(), getAuthenticatedUserId(), FriendStatus.UNACCEPTED).orElseThrow(
                 () -> new SubscriptionDoesNotExistException("Подписка невозможна")
         );
 
@@ -126,7 +126,7 @@ public class UserService {
     public void removeFriend(FriendshipDto friendshipDto) {
 
         Subscription subscription = subscriptionRepository.findBySubscriber_IdAndTargetUser_IdAndFriendStatus(
-                getAuthenticatedUserId(), friendshipDto.getTargetUserId(),   FriendStatus.ACCEPTED).orElseThrow(
+                getAuthenticatedUserId(), friendshipDto.getTargetUserId(), FriendStatus.ACCEPTED).orElseThrow(
                 () -> new SubscriptionDoesNotExistException("Ошибочный запрос. Отписаться невозможно"));
 
         subscription.setFriendStatus(FriendStatus.UNACCEPTED);

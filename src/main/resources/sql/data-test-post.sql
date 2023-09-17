@@ -10,3 +10,4 @@ VALUES (1, 'Title', 'Text', '2023-09-15 20:30:04.111222');
 INSERT INTO subscriptions (subscriber_id, target_user_id, friend_status, subs_status)
 VALUES (2, 1, 0, 1),
        (1, 3, 1, 2);
+

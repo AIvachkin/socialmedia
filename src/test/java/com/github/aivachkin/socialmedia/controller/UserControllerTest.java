@@ -150,7 +150,7 @@ class UserControllerTest {
 
     @SneakyThrows
     private void getAccessToken() {
-        JwtRequest authRequest = new JwtRequest("user1@example.com", "password1");
+        JwtRequest authRequest = new JwtRequest("user1@example.com", "password");
         JwtResponse jwtResponse = authService.login(authRequest);
         accessToken = jwtResponse.getAccessToken();
     }
